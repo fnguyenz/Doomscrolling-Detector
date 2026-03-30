@@ -9,7 +9,7 @@ import time # grace period
 # state variables
 model = y("yolov8n.pt") # obtain teh only file we need so that we save on storage
 phone = 0 # timestamp of when phone was last detected
-graceperiod = 5 # this is the time the program waits before stating offtask after seeing phone
+graceperiod = 3 # this is the time the program waits before stating offtask after seeing phone
 vid = cv.VideoCapture(0) # get the webcam
 
 # create a function for detecting, which only activates if user has turned the STUDY timer on
@@ -29,11 +29,22 @@ def detect_status():
 
     # loop through to determine what objects are detected
     for box in results.boxes:
+        # ignore any small boxes that app may mistake as phone
+        x1, y1, x2, y2 = map(int, box.xyxy[0])
+        w = x2 - x1
+        h = y2 - y1
+        if w*h < 500: # ignore the boxes smaller than 500px
+            continue
         cls = int(box.cls[0]) #cls is class index
+        con = float(box.conf[0]) # the apps confidence in detection
         label = model.names[cls] # converts into a label for user to read 
 
-        if label == "cell phone": # cellphone is converted through model.names
+        if label == "cell phone" and con > 0.5: # cellphone is converted through model.names
             phoneseen = True
+
+        cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+        cv.putText(frame, f"{label} {con:.2f}", (x1, y1 - 10),
+                   cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 2)
     
     # phone detection, if becomes true then get the timestamp of when it was seen and if it is still seen
     if phoneseen:

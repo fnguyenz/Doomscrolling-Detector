@@ -15,6 +15,7 @@ POSSIBLY MAKE A TIMER TO DETERMINE HOW LONG I AM ACTUALLY WORKING VS OFF TASK
 import cv2 as cv
 from detector import detect_status, release
 
+# create the timer itself
 
 # create loop to connect everything togehter
 while True:
