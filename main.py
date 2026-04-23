@@ -18,19 +18,19 @@ from detector import detect_status, release
 # create the timer itself
 
 # create loop to connect everything togehter
-while True:
-    frame, status = detect_status()
-    # if no frame then cancel
-    if frame is None:
-        break
+# while True:
+#     frame, status = detect_status()
+#     # if no frame then cancel
+#     if frame is None:
+#         break
 
-    cv.putText(frame,status, (20,40),
-               cv.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 2)
+#     cv.putText(frame,status, (20,40),
+#                cv.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 2)
     
-    # this is the image of the user being projected
-    cv.imshow("Detector", frame)
+#     # this is the image of the user being projected
+#     cv.imshow("Detector", frame)
 
-    # quit camera overall
-    if cv.waitKey(1) == 27: # the escape key
-        break
-release()
+#     # quit camera overall
+#     if cv.waitKey(1) == 27: # the escape key
+#         break
+# release()

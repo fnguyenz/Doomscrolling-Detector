@@ -7,10 +7,11 @@ from ultralytics import YOLO as y # object detection
 import time # grace period
 
 # state variables
-model = y("yolov8n.pt") # obtain teh only file we need so that we save on storage
+model = y("yolov8n.pt") # obtain the only file we need so that we save on storage
 phone = 0 # timestamp of when phone was last detected
-graceperiod = 3 # this is the time the program waits before stating offtask after seeing phone
+graceperiod = 1 # the time the program takes to process whether there is a phone on screen
 vid = cv.VideoCapture(0) # get the webcam
+width, height = 800, 600
 
 # create a function for detecting, which only activates if user has turned the STUDY timer on
 def detect_status():
@@ -59,13 +60,17 @@ def detect_status():
     
     return frame, status
 
+# create a function to play a video when off task
+def playvid():
+    pass
 # function to end the camera 
 def release():
     vid.release()
     cv.destroyAllWindows()
 
 
-# # a loop to constantly produce frames and produce video
+# used to test and figure out how to work webcam
+# a loop to constantly produce frames and produce video
 # def cam():
 #     global a
 #     while True:
