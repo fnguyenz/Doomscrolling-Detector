@@ -9,7 +9,6 @@ from detector import detect_status
 # use gui to make this look more organized and easy to navigate
 # in this, i will put together all the logic in a pleasing way.
 # this also means i manage the timer and detection logic using the tkinter .after() function
-
 # main part
 root = tk.Tk()
 root.title("Studies")
@@ -32,6 +31,7 @@ for i in range(4):
 settings.grid(padx=10, pady=10, row=0, column=0,columnspan=4, sticky="news")
 settings.grid_propagate(False)
 
+# for the webcam to appear on the gui
 cam = tk.Frame(bod, bg="#F0EEE9")
 cam.grid(padx=5,pady=5, row=1,columnspan=2,column=1)
 
@@ -40,14 +40,39 @@ camlabel.grid(row=0,column=0)
 
 # buttons within settings
 subtract = tk.Button(settings, text="-", relief="flat", bg="#F0EEE9", fg="#6C4B71",
-                     highlightbackground="#F0EEE9", activebackground="#F0EEE9", 
-                     pady=20,padx=30, command=lambda: print("subtract time!"))
+                    highlightbackground="#F0EEE9", activebackground="#F0EEE9", 
+                    pady=20,padx=30, command=lambda: print("subtract time!"))
 subtract.grid(padx=(0,0),pady=(0,0), row=0, column=1, sticky="nsew")
 
 add = tk.Button(settings, text="+",bg="#F0EEE9", relief="flat", fg="#6C4B71", 
-                 highlightbackground="#F0EEE9", activebackground="#F0EEE9",
-                 pady=20,padx=30, command=lambda: print("add time!"))
+                highlightbackground="#F0EEE9", activebackground="#F0EEE9",
+                pady=20,padx=30, command=lambda: print("add time!"))
 add.grid(padx=(0,0),pady=(0,0),row=0,column=4, sticky="nsew")
 
+# function for continuously displaying and updating the camera
+def updatecam():
+    frame, status = detect_status()
+    # if there is no frame, dont update, if there is, make proper update protocols
+    if frame is not None:
+        # since frame is there, convert opencv frames from bgr to rgb
+        # replace old frame with rbg frames to get the current frame
+        frame = cv.cvtColor(frame, cv.COLOR_BGR2RGB)
 
+        # convert to pil image to heelp convert to a more compatible file for tkinter
+        img = Image.fromarray(frame)        
+
+        # convert to tkinter friendly file
+        imgtk = ImageTk.PhotoImage(image=img)        
+
+        #updating the camera label
+        #this turns camlabel.imgtk into the tkinter image file we made above
+        camlabel.imgtk = imgtk
+        camlabel.configure(image=imgtk)
+
+    # continuously call this after specific time
+    camlabel.after(10, updatecam)
+
+#ensure the camera gets updated
+updatecam()
+# run the ui itself!
 root.mainloop()

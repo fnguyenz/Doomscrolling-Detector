@@ -14,25 +14,6 @@ POSSIBLY MAKE A TIMER TO DETERMINE HOW LONG I AM ACTUALLY WORKING VS OFF TASK
 # includes functions from other files, or modules
 import cv2 as cv
 from detector import detect_status, release
+import ui # importing allows for the gui to play
 
-# create the timer itself
-
-# # create loop to connect everything together
-
-
-# while True:
-#     frame, status = detect_status()
-#     # if no frame then cancel
-#     if frame is None:
-#         break
-
-#     cv.putText(frame,status, (20,40),
-#                cv.FONT_HERSHEY_COMPLEX, 1, (255,255,255), 2)
-    
-#     # this is the image of the user being projected
-#     cv.imshow("Detector", frame)
-
-#     # quit camera overall
-#     if cv.waitKey(1) == 27: # the escape key
-#         break
-# release()
+# create the timer and implement any previously saved settings
