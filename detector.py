@@ -11,7 +11,10 @@ model = y("yolov8n.pt") # obtain the only file we need so that we save on storag
 phone = 0 # timestamp of when phone was last detected
 graceperiod = 1 # the time the program takes to process whether there is a phone on screen
 vid = cv.VideoCapture(0) # get the webcam
-width, height = 800, 600
+width, height = 800, 600 # for the webcam sizes on tkinter
+# set the wwidth/height based on these values
+vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
+vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
 
 # create a function for detecting, which only activates if user has turned the STUDY timer on
 def detect_status():

@@ -3,7 +3,7 @@
 import tkinter as tk
 from PIL import Image, ImageTk # for the image conversion of the webcam!
 import cv2 as cv
-from detector import vid
+from detector import detect_status
 
 
 # use gui to make this look more organized and easy to navigate
@@ -35,6 +35,8 @@ settings.grid_propagate(False)
 cam = tk.Frame(bod, bg="#F0EEE9")
 cam.grid(padx=5,pady=5, row=1,columnspan=2,column=1)
 
+camlabel = tk.Label(cam, bg="#FFFFFF")
+camlabel.grid(row=0,column=0)
 
 # buttons within settings
 subtract = tk.Button(settings, text="-", relief="flat", bg="#F0EEE9", fg="#6C4B71",

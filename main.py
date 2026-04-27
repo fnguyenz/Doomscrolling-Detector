@@ -17,7 +17,9 @@ from detector import detect_status, release
 
 # create the timer itself
 
-# create loop to connect everything togehter
+# # create loop to connect everything together
+
+
 # while True:
 #     frame, status = detect_status()
 #     # if no frame then cancel
