@@ -28,6 +28,7 @@ settings = tk.Frame(bod, bg="#F0EEE9")
 for i in range(4): 
     bod.grid_columnconfigure(i, weight=1)
     bod.grid_rowconfigure(i,weight=1)
+    settings.grid_columnconfigure(i, weight=1)
 settings.grid(padx=10, pady=10, row=0, column=0,columnspan=4, sticky="news")
 settings.grid_propagate(False)
 
@@ -35,19 +36,23 @@ settings.grid_propagate(False)
 cam = tk.Frame(bod, bg="#F0EEE9")
 cam.grid(padx=5,pady=5, row=1,columnspan=2,column=1)
 
-camlabel = tk.Label(cam, bg="#FFFFFF")
-camlabel.grid(row=0,column=0)
+camlabel = tk.Label(bod, bg="#FFFFFF")
+camlabel.grid(row=1,column=1, columnspan=2)
 
 # buttons within settings
 subtract = tk.Button(settings, text="-", relief="flat", bg="#F0EEE9", fg="#6C4B71",
                     highlightbackground="#F0EEE9", activebackground="#F0EEE9", 
                     pady=20,padx=30, command=lambda: print("subtract time!"))
-subtract.grid(padx=(0,0),pady=(0,0), row=0, column=1, sticky="nsew")
+subtract.grid(padx=(0,0),pady=(0,0), row=0, column=0, sticky="nse")
 
 add = tk.Button(settings, text="+",bg="#F0EEE9", relief="flat", fg="#6C4B71", 
                 highlightbackground="#F0EEE9", activebackground="#F0EEE9",
                 pady=20,padx=30, command=lambda: print("add time!"))
-add.grid(padx=(0,0),pady=(0,0),row=0,column=4, sticky="nsew")
+add.grid(padx=(0,0),pady=(0,0),row=0,column=3, sticky="nsw")
+
+# timer length
+timer = tk.Label(settings, text="0:00", bg="#FFFFFF", fg="#DDD8C9")
+timer.grid(padx=10, row=0, column=1, columnspan=2, sticky="nsew")
 
 # function for continuously displaying and updating the camera
 def updatecam():
@@ -70,7 +75,7 @@ def updatecam():
         camlabel.configure(image=imgtk)
 
     # continuously call this after specific time
-    camlabel.after(10, updatecam)
+    camlabel.after(7, updatecam)
 
 #ensure the camera gets updated
 updatecam()

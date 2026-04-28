@@ -5,14 +5,15 @@
 import cv2 as cv # camera process
 from ultralytics import YOLO as y # object detection
 import time # grace period
+from PIL import Image
 
 # state variables
 model = y("yolov8n.pt") # obtain the only file we need so that we save on storage
 phone = 0 # timestamp of when phone was last detected
 graceperiod = 1 # the time the program takes to process whether there is a phone on screen
 vid = cv.VideoCapture(0) # get the webcam
-width, height = 800, 600 # for the webcam sizes on tkinter
-# set the wwidth/height based on these values
+width, height = 600, 600 # for the webcam sizes on tkinter
+# set the width/height based on these values in order to display at only this size
 vid.set(cv.CAP_PROP_FRAME_WIDTH, width)
 vid.set(cv.CAP_PROP_FRAME_HEIGHT, height)
 
@@ -26,6 +27,17 @@ def detect_status():
 
     if not ret:
         return None, "NOCAM" # means no frame captured
+    
+    # for cropping the camera view into a square
+    h, w = frame.shape[:2]
+    size = min(h, w)
+
+    # make an equation that gets the new x and y to maintain square
+    x1 = (w-size)//2 
+    y1 = (h-size)//2 #//2 is dividing by 2
+
+    # update the frame according to the new square ratio version
+    frame = frame[y1:y1+size, x1:x1+size]
     
     # this is the actual detection
     results = model(frame, verbose=False)[0]
