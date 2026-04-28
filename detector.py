@@ -57,10 +57,10 @@ def detect_status():
 
         if label == "cell phone" and con > 0.5: # cellphone is converted through model.names
             phoneseen = True
+            cv.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            cv.putText(frame, f"{label} {con:.2f}", (x1, y1 - 10),
+                    cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 2)
 
-        cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        cv.putText(frame, f"{label} {con:.2f}", (x1, y1 - 10),
-                   cv.FONT_HERSHEY_COMPLEX, 0.5, (255, 255, 255), 2)
     
     # phone detection, if becomes true then get the timestamp of when it was seen and if it is still seen
     if phoneseen:
