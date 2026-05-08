@@ -11,9 +11,6 @@ totalseconds = 0 # at default, there is nothing in the timer
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
-
-
-
 def subtract():
     global totalseconds
 
@@ -82,24 +79,42 @@ add.grid(padx=(0,0),pady=(0,0),row=0,column=3, sticky="nsw")
 timer = tk.Label(settings, text="00:00", bg="#FFFFFF", fg="#C9DDCB", font=("Dynapuff", 40))
 timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="nesw")
 
+def studytime():
+    global totalseconds
+    global running
+
+    hours = (totalseconds // 3600) % 24
+    mins = (totalseconds % 3600) // 60 # // for rounding to the nearest integer
+    secs = totalseconds % 60
+    # if remaining time is greater than 0, study time still ongoing
+    if totalseconds > 0 and running:
+        if hours > 0:
+            timer.config(text=f"{hours:02}:{mins:02}:{secs:02}")
+        else:
+            timer.config(text=f"{mins:02}:{secs:02}")
+        totalseconds -= 1
+    else: # if time reaches 0, or less, test is done
+        running = False
+    root.after(1000, studytime)
+
 # start timer button / later transforms to pause if already started
 timerbutton = tk.Button(bod, text="start", relief="flat",bg="#E9F0E9", fg="#52714B",
                         highlightbackground="#E9F0E9", activebackground="#E9F0E9",
-                        pady=20,padx=30, font=("Dynapuff", 20),command=lambda: print("timer started!"))
+                        pady=20,padx=30, font=("Dynapuff", 20),command=studytime)
 timerbutton.grid(padx=(0,0),pady=(0,0), row=1, column=1, columnspan=2, sticky="sew")
-
 
 #refresh the timer
 def refresh():
     hours = (totalseconds // 3600) % 24
-    mins = (totalseconds % 3600) // 60 # for rounding to the nearest integer
-    secs = totalseconds % 60 # for keeping it counting up to 60 max
+    mins = (totalseconds % 3600) // 60 # // for rounding to the nearest integer
+    secs = totalseconds % 60 # % for keeping it counting up to 60 max
 
     # edit the timer label to ensure that itll refresh!
     if hours > 0:
         timer.config(text=f"{hours:02}:{mins:02}:{secs:02}") # display hours once mins reaches 60
     else:
         timer.config(text=f"{mins:02}:{secs:02}") # {variable:digit} displays the numbers by 2 digits only
+
 
 # function for continuously displaying and updating the camera
 def updatecam():
