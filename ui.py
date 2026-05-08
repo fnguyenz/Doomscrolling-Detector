@@ -11,6 +11,9 @@ totalseconds = 0 # at default, there is nothing in the timer
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
+
+
+
 def subtract():
     global totalseconds
 
@@ -19,12 +22,14 @@ def subtract():
         totalseconds -= 60
     else:
         totalseconds = 0
+    refresh()
 
 def add():
     global totalseconds
     # add 60 seconds (a minute)
 
     totalseconds +=60
+    refresh()
 
 # use gui to make this look more organized and easy to navigate
 # in this, i will put together all the logic in a pleasing way.
@@ -70,7 +75,7 @@ subtract.grid(padx=(0,0),pady=(0,0), row=0, column=0, sticky="nse")
 
 add = tk.Button(settings, text="+",bg="#E9F0E9", relief="flat", fg="#52714B", 
                 highlightbackground="#E9F0E9", activebackground="#E9F0E9",
-                pady=20,padx=30, command=lambda: print("add time!"))
+                pady=20,padx=30, command=add)
 add.grid(padx=(0,0),pady=(0,0),row=0,column=3, sticky="nsw")
 
 # timer length
@@ -84,6 +89,17 @@ timerbutton = tk.Button(bod, text="start", relief="flat",bg="#E9F0E9", fg="#5271
 timerbutton.grid(padx=(0,0),pady=(0,0), row=1, column=1, columnspan=2, sticky="sew")
 
 
+#refresh the timer
+def refresh():
+    hours = (totalseconds // 3600) % 24
+    mins = (totalseconds % 3600) // 60 # for rounding to the nearest integer
+    secs = totalseconds % 60 # for keeping it counting up to 60 max
+
+    # edit the timer label to ensure that itll refresh!
+    if hours > 0:
+        timer.config(text=f"{hours:02}:{mins:02}:{secs:02}") # display hours once mins reaches 60
+    else:
+        timer.config(text=f"{mins:02}:{secs:02}") # {variable:digit} displays the numbers by 2 digits only
 
 # function for continuously displaying and updating the camera
 def updatecam():
@@ -124,7 +140,7 @@ def updatecam():
     camlabel.after(10, updatecam)
 
 #ensure the camera gets updated
-studytime()
+# studytime()
 updatecam()
 # run the ui itself!
 root.mainloop()
