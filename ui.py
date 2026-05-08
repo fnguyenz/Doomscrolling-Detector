@@ -5,6 +5,26 @@ from PIL import Image, ImageTk # for the image conversion of the webcam!
 import cv2 as cv
 from detector import detect_status
 
+# variables for the timer
+running = False
+totalseconds = 0 # at default, there is nothing in the timer
+
+# functions for adding and removing time
+# these functions need to be above to ensure that the gui knows what the functions are
+def subtract():
+    global totalseconds
+
+    #remove 60 seconds (a minute)
+    if totalseconds >= 60: # restrict it to ensure that time doesnt go into negatives
+        totalseconds -= 60
+    else:
+        totalseconds = 0
+
+def add():
+    global totalseconds
+    # add 60 seconds (a minute)
+
+    totalseconds +=60
 
 # use gui to make this look more organized and easy to navigate
 # in this, i will put together all the logic in a pleasing way.
@@ -13,65 +33,76 @@ from detector import detect_status
 root = tk.Tk()
 root.title("Studies")
 root.minsize(800,800)
-root.config(bg="#DDD8C9")
+root.config(bg="#C9DDCB")
 root.grid_columnconfigure(0, weight=1)
 root.grid_rowconfigure(0,weight=1)
 
 # colours are #6C4B71 for purple, #F0EEE9 for cream, #DDD8C9 darker cream
 #body
-bod = tk.Frame(root, bg="#F0EEE9")
+bod = tk.Frame(root, bg="#E9F0E9")
 bod.grid(padx=30, pady=30, row=0,column=0, sticky="nsew")
 bod.grid_propagate(False)
 
 # put items like timer options and webcam inside body
-settings = tk.Frame(bod, bg="#F0EEE9")
+settings = tk.Frame(bod, bg="#E9F0E9")
 settings.grid_rowconfigure(0, weight=1)
 settings.grid(padx=10, row=0, column=0,columnspan=4, sticky="news")
 settings.grid_propagate(False)
 
 for i in range(4): 
     bod.grid_columnconfigure(i, weight=1)
-    bod.grid_rowconfigure(i,weight=1)
     settings.grid_columnconfigure(i, weight=1)
+    bod.grid_rowconfigure(0,weight=1)
 
 # for the webcam to appear on the gui
 camlabel = tk.Label(bod, bg="#FFFFFF")
 camlabel.grid(row=2,column=1, columnspan=2)
 
-statuslabel = tk.Label(bod, bg="#F0EEE9")
+statuslabel = tk.Label(bod, bg="#E9F0E9")
 statuslabel.grid(row=3, column=2, sticky="nsw")
 
 # buttons within settings
-subtract = tk.Button(settings, text="-", relief="flat", bg="#F0EEE9", fg="#6C4B71",
-                    highlightbackground="#F0EEE9", activebackground="#F0EEE9", 
-                    pady=20,padx=30, command=lambda: print("subtract time!"))
+
+subtract = tk.Button(settings, text="-", relief="flat", bg="#E9F0E9", fg="#52714B",
+                    highlightbackground="#E9F0E9", activebackground="#E9F0E9", 
+                    pady=20,padx=30, command=subtract)
 subtract.grid(padx=(0,0),pady=(0,0), row=0, column=0, sticky="nse")
 
-add = tk.Button(settings, text="+",bg="#F0EEE9", relief="flat", fg="#6C4B71", 
-                highlightbackground="#F0EEE9", activebackground="#F0EEE9",
+add = tk.Button(settings, text="+",bg="#E9F0E9", relief="flat", fg="#52714B", 
+                highlightbackground="#E9F0E9", activebackground="#E9F0E9",
                 pady=20,padx=30, command=lambda: print("add time!"))
 add.grid(padx=(0,0),pady=(0,0),row=0,column=3, sticky="nsw")
 
 # timer length
-timer = tk.Label(settings, text="0:00", bg="#FFFFFF", fg="#DDD8C9", font=("Dynapuff", 40))
-timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="new")
+timer = tk.Label(settings, text="00:00", bg="#FFFFFF", fg="#C9DDCB", font=("Dynapuff", 40))
+timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="nesw")
 
 # start timer button / later transforms to pause if already started
-timerbutton = tk.Button(bod, text="start", relief="flat",bg="#F0EEE9", fg="#6C4B71",
-                        highlightbackground="#F0EEE9", activebackground="#F0EEE9",
-                        pady=20,padx=30,command=lambda: print("timer started!"))
+timerbutton = tk.Button(bod, text="start", relief="flat",bg="#E9F0E9", fg="#52714B",
+                        highlightbackground="#E9F0E9", activebackground="#E9F0E9",
+                        pady=20,padx=30, font=("Dynapuff", 20),command=lambda: print("timer started!"))
 timerbutton.grid(padx=(0,0),pady=(0,0), row=1, column=1, columnspan=2, sticky="sew")
+
+
 
 # function for continuously displaying and updating the camera
 def updatecam():
     global lasttk
+    global running
     frame, status = detect_status()
     # if there is no frame, dont update, if there is, make proper update protocols
     if frame is not None:
         # when condition doesnt apply, blur out the image
         # play video/display a message and blare a noise to alarm the user to get working!
         if status == "OFFTASK":
+                statuslabel.config(text="Off Task", fg="#714B4E", font=("Dynapuff", 20))
                 frame = cv.GaussianBlur(frame, (25,25), 0)
+                running = False
+        else:
+        # user is on task if the condition doesnt apply!  
+        # if user is ontask, state that on the screen and allow frames to continue
+            running = True
+            statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
 
         # otherwise, convert opencv frames from bgr to rgb
         # replace old frame with rbg frames to get the current frame
@@ -88,16 +119,12 @@ def updatecam():
         camlabel.configure(image=imgtk)
 
 
-        # if user is ontask, state that on the screen and allow frames to continue
-        if status == "ONTASK":
-            statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
-        else:
-            statuslabel.config(text="Off Task", fg="#714B4E", font=("Dynapuff", 20)) # user is off task if the condition doesnt apply!
 
     # continuously call this after specific time
-    camlabel.after(5, updatecam)
+    camlabel.after(10, updatecam)
 
 #ensure the camera gets updated
+studytime()
 updatecam()
 # run the ui itself!
 root.mainloop()
