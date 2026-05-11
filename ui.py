@@ -4,12 +4,17 @@ import tkinter as tk
 from PIL import Image, ImageTk # for the image conversion of the webcam!
 import cv2 as cv
 from detector import detect_status
+import random as rd
 
 # variables for the timer
 running = False
 totalseconds = 0 # at default, there is nothing in the timer
 timerdone = False
 timerstatus = ""
+
+# variables for the alarm
+alarmplaying = False
+alarm = ['alarmclock.mp3', 'alarmsound.mp3']
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
@@ -84,17 +89,9 @@ timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="nesw")
 # for the timer logic! displaying time
 def studytime():
     global totalseconds, running, timerstatus, timerdone
-
-    hours = (totalseconds // 3600) % 24
-    mins = (totalseconds % 3600) // 60 # // for rounding to the nearest integer
-    secs = totalseconds % 60
-
-    if hours > 0:
-        timer.config(text=f"{hours:02}:{mins:02}:{secs:02}")
-    else:
-        timer.config(text=f"{mins:02}:{secs:02}")
-
-
+    # update the timer depending on whether theres an hour of time or not!
+    refresh()
+    #check if the timer is currently active or not.
     if timerstatus == "RUNNING":
         # if remaining time is greater than 0, study time still ongoing
         if running and totalseconds > 0:
@@ -103,8 +100,6 @@ def studytime():
         elif totalseconds == 0: # if time reaches 0, or less, test is done
             timerdone = True
             pause()
-
-
     root.after(1000, studytime)
 
 #function or playing the timer
@@ -146,20 +141,28 @@ def refresh():
 
 # function for continuously displaying and updating the camera
 def updatecam():
-    global lasttk, running, timerstatus, totalseconds
+    global lasttk, running, timerstatus, totalseconds, alarmplaying
     frame, status = detect_status()
     # if there is no frame, dont update, if there is, make proper update protocols
     if frame is not None:
         # when condition doesnt apply, blur out the image
         # play video/display a message and blare a noise to alarm the user to get working!
         if status == "OFFTASK":
-                statuslabel.config(text="Off Task", fg="#714B4E", font=("Dynapuff", 20))
-                frame = cv.GaussianBlur(frame, (25,25), 0)
-                running = False
+            statuslabel.config(text="Off Task", fg="#714B4E", font=("Dynapuff", 20))
+            frame = cv.GaussianBlur(frame, (25,25), 0)
+            running = False
+            # ensure the alarm only plays once by checking if its on or not...
+            if not alarmplaying:
+                alarmplaying = True
+                ### PLAY AUDIO
+
         else:
         # user is on task if the condition doesnt apply!  
         # if user is ontask, state that on the screen and allow frames to continue
             statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
+            # turn off the alarm!
+            alarmplaying = False
+            
             # turn the timer back on!
             if timerstatus == "RUNNING" and totalseconds > 0:
                 running = True
