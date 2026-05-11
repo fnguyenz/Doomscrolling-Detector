@@ -5,6 +5,7 @@ from PIL import Image, ImageTk # for the image conversion of the webcam!
 import cv2 as cv
 from detector import detect_status
 import random as rd
+import pygame
 
 # variables for the timer
 running = False
@@ -15,6 +16,9 @@ timerstatus = ""
 # variables for the alarm
 alarmplaying = False
 alarm = ['alarmclock.mp3', 'alarmsound.mp3']
+
+#initiate pygame
+pygame.mixer.init()
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
@@ -147,7 +151,7 @@ def updatecam():
     if frame is not None:
         # when condition doesnt apply, blur out the image
         # play video/display a message and blare a noise to alarm the user to get working!
-        if status == "OFFTASK":
+        if status == "OFFTASK" and timerstatus == "RUNNING":
             statuslabel.config(text="Off Task", fg="#714B4E", font=("Dynapuff", 20))
             frame = cv.GaussianBlur(frame, (25,25), 0)
             running = False
@@ -155,14 +159,20 @@ def updatecam():
             if not alarmplaying:
                 alarmplaying = True
                 ### PLAY AUDIO
+                # get a random audio before playing it
+                randomalarm = rd.choice(alarm)
 
+                # play the audio using pygame!
+                pygame.mixer.music.load(randomalarm)
+                pygame.mixer.music.play()
         else:
         # user is on task if the condition doesnt apply!  
         # if user is ontask, state that on the screen and allow frames to continue
             statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
             # turn off the alarm!
             alarmplaying = False
-            
+            pygame.mixer.music.stop()
+
             # turn the timer back on!
             if timerstatus == "RUNNING" and totalseconds > 0:
                 running = True
