@@ -8,6 +8,8 @@ from detector import detect_status
 # variables for the timer
 running = False
 totalseconds = 0 # at default, there is nothing in the timer
+timerdone = False
+timerstatus = ""
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
@@ -79,28 +81,54 @@ add.grid(padx=(0,0),pady=(0,0),row=0,column=3, sticky="nsw")
 timer = tk.Label(settings, text="00:00", bg="#FFFFFF", fg="#C9DDCB", font=("Dynapuff", 40))
 timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="nesw")
 
+# for the timer logic! displaying time
 def studytime():
-    global totalseconds
-    global running
+    global totalseconds, running, timerstatus, timerdone
 
     hours = (totalseconds // 3600) % 24
     mins = (totalseconds % 3600) // 60 # // for rounding to the nearest integer
     secs = totalseconds % 60
-    # if remaining time is greater than 0, study time still ongoing
-    if totalseconds > 0 and running:
-        if hours > 0:
-            timer.config(text=f"{hours:02}:{mins:02}:{secs:02}")
-        else:
-            timer.config(text=f"{mins:02}:{secs:02}")
-        totalseconds -= 1
-    else: # if time reaches 0, or less, test is done
-        running = False
+
+    if hours > 0:
+        timer.config(text=f"{hours:02}:{mins:02}:{secs:02}")
+    else:
+        timer.config(text=f"{mins:02}:{secs:02}")
+
+
+    if timerstatus == "RUNNING":
+        # if remaining time is greater than 0, study time still ongoing
+        if running and totalseconds > 0:
+            totalseconds -= 1
+            timerdone = False
+        elif totalseconds == 0: # if time reaches 0, or less, test is done
+            timerdone = True
+            pause()
+
+
     root.after(1000, studytime)
+
+#function or playing the timer
+def start():
+    global running, timerstatus
+    running = True 
+    timerstatus = "RUNNING"
+
+    # change the button from start, to pause!
+    timerbutton.config(text="pause", command=pause)
+# function for pausing the timer.
+def pause():
+    global running, timerstatus
+    running = False
+    timerstatus = "NOT RUNNING"
+
+    # change the button from start, to pause!
+    timerbutton.config(text="start", command=start)
+
 
 # start timer button / later transforms to pause if already started
 timerbutton = tk.Button(bod, text="start", relief="flat",bg="#E9F0E9", fg="#52714B",
                         highlightbackground="#E9F0E9", activebackground="#E9F0E9",
-                        pady=20,padx=30, font=("Dynapuff", 20),command=studytime)
+                        pady=20,padx=30, font=("Dynapuff", 20),command=start)
 timerbutton.grid(padx=(0,0),pady=(0,0), row=1, column=1, columnspan=2, sticky="sew")
 
 #refresh the timer
@@ -118,8 +146,7 @@ def refresh():
 
 # function for continuously displaying and updating the camera
 def updatecam():
-    global lasttk
-    global running
+    global lasttk, running, timerstatus, totalseconds
     frame, status = detect_status()
     # if there is no frame, dont update, if there is, make proper update protocols
     if frame is not None:
@@ -132,8 +159,10 @@ def updatecam():
         else:
         # user is on task if the condition doesnt apply!  
         # if user is ontask, state that on the screen and allow frames to continue
-            running = True
             statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
+            # turn the timer back on!
+            if timerstatus == "RUNNING" and totalseconds > 0:
+                running = True
 
         # otherwise, convert opencv frames from bgr to rgb
         # replace old frame with rbg frames to get the current frame
@@ -149,13 +178,11 @@ def updatecam():
         camlabel.imgtk = imgtk
         camlabel.configure(image=imgtk)
 
-
-
     # continuously call this after specific time
     camlabel.after(10, updatecam)
 
 #ensure the camera gets updated
-# studytime()
+studytime()
 updatecam()
 # run the ui itself!
 root.mainloop()

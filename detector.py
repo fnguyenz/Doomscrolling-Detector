@@ -54,7 +54,6 @@ def detect_status():
         cls = int(box.cls[0]) #cls is class index
         con = float(box.conf[0]) # the apps confidence in detection
         label = model.names[cls] # converts into a label for user to read 
-
         if label == "cell phone" and con > 0.5: # cellphone is converted through model.names
             phoneseen = True
             cv.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
