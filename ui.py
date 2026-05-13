@@ -16,9 +16,17 @@ timerstatus = ""
 # variables for the alarm
 alarmplaying = False
 alarm = ['alarmclock.mp3', 'alarmsound.mp3']
+finish = 'timerdone.mp3'
 
 #initiate pygame
 pygame.mixer.init()
+
+# get a random audio before playing it
+rdalarm = rd.choice(alarm)
+random = pygame.mixer.Sound(rdalarm) # so that it doesnt interfere with the other audio playing
+
+finishaudio = pygame.mixer.Sound(finish)
+
 
 # functions for adding and removing time
 # these functions need to be above to ensure that the gui knows what the functions are
@@ -92,7 +100,7 @@ timer.grid(padx=10, pady=5, row=0, column=1, columnspan=2, sticky="nesw")
 
 # for the timer logic! displaying time
 def studytime():
-    global totalseconds, running, timerstatus, timerdone
+    global totalseconds, running, timerstatus, timerdone, finishaudio
     # update the timer depending on whether theres an hour of time or not!
     refresh()
     #check if the timer is currently active or not.
@@ -101,9 +109,11 @@ def studytime():
         if running and totalseconds > 0:
             totalseconds -= 1
             timerdone = False
-        elif totalseconds == 0: # if time reaches 0, or less, test is done
-            timerdone = True
-            pause()
+        elif totalseconds <= 0: # if time reaches 0, or less, test is done
+            if not timerdone:
+                timerdone = True
+                finishaudio.play()
+                pause()
     root.after(1000, studytime)
 
 #function or playing the timer
@@ -145,7 +155,7 @@ def refresh():
 
 # function for continuously displaying and updating the camera
 def updatecam():
-    global lasttk, running, timerstatus, totalseconds, alarmplaying
+    global lasttk, running, timerstatus, totalseconds, alarmplaying, random 
     frame, status = detect_status()
     # if there is no frame, dont update, if there is, make proper update protocols
     if frame is not None:
@@ -159,19 +169,17 @@ def updatecam():
             if not alarmplaying:
                 alarmplaying = True
                 ### PLAY AUDIO
-                # get a random audio before playing it
-                randomalarm = rd.choice(alarm)
 
                 # play the audio using pygame!
-                pygame.mixer.music.load(randomalarm)
-                pygame.mixer.music.play()
+                random.play()
         else:
         # user is on task if the condition doesnt apply!  
         # if user is ontask, state that on the screen and allow frames to continue
             statuslabel.config(text="On Task", fg="#4B7155", font=("Dynapuff", 20)) # stating that the user is still ontask
             # turn off the alarm!
-            alarmplaying = False
-            pygame.mixer.music.stop()
+            if alarmplaying:
+                alarmplaying = False
+                random.stop()
 
             # turn the timer back on!
             if timerstatus == "RUNNING" and totalseconds > 0:
